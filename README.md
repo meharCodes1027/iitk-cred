@@ -142,10 +142,4 @@ Replace mock data with Firestore integration in production.
 4. Add tests
 5. Submit a pull request
 
-## 📄 License
-
-MIT License - feel free to use this for your hackathon projects!
-
----
-
 **Built for Fintech Hackathons** 🏆
