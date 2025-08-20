@@ -1,0 +1,183 @@
+import React from "react";
+import { motion } from "framer-motion";
+import { 
+  Building2,
+  BarChart3,
+  Calendar,
+  Brain,
+  Shield,
+  AlertTriangle,
+  Activity,
+  FileText,
+  TrendingUp,
+  Clock
+} from "lucide-react";
+import SpotlightCard from "./components/SpotlightCard";
+import ScoreIndicator from "./components/ScoreIndicator";
+import ShinyText from "./components/ShinyText";
+
+function getScoreColor(score) {
+  if (!score) return '#64748b';
+  if (score >= 70) return '#10b981';
+  if (score >= 40) return '#f59e0b';
+  return '#ef4444';
+}
+
+function getOutlookIcon(outlook) {
+  switch (outlook?.toLowerCase()) {
+    case 'positive': return <Shield className="w-5 h-5 text-green-400" />;
+    case 'negative': return <AlertTriangle className="w-5 h-5 text-red-400" />;
+    default: return <Activity className="w-5 h-5 text-gray-400" />;
+  }
+}
+
+function getRiskLevel(score) {
+  if (!score) return { level: 'Unknown', color: '#64748b' };
+  if (score >= 70) return { level: 'Low Risk', color: '#10b981' };
+  if (score >= 40) return { level: 'Medium Risk', color: '#f59e0b' };
+  return { level: 'High Risk', color: '#ef4444' };
+}
+
+function formatTimestamp(timestamp) {
+  if (!timestamp) return 'N/A';
+  try {
+    return new Date(timestamp).toLocaleString();
+  } catch {
+    return timestamp.slice(0, 19).replace('T', ' ');
+  }
+}
+
+export default function IssuerDetail({ details }) {
+  const { issuer, score, events } = details;
+  
+  if (!issuer) {
+    return null;
+  }
+
+  return (
+    <div className="mt-6">
+      <SpotlightCard className="p-6 max-w-5xl mx-auto">
+        <div className="space-y-8">
+          {/* Header */}
+          <div className="flex flex-col space-y-2">
+            <div className="flex items-center space-x-3">
+              <Building2 className="text-blue-500 w-6 h-6" />
+              <h2 className="text-2xl font-bold text-white">
+                {issuer.name}
+              </h2>
+            </div>
+            <p className="text-gray-400">
+              {issuer.sector} • Baseline Rating: <span className="text-blue-400 font-medium">{issuer.baseline_rating}</span>
+            </p>
+          </div>
+
+          {/* Score Section */}
+          <Grid item xs={12} md={4}>
+            <Paper elevation={2} sx={{ p: 3, textAlign: 'center' }}>
+              <Typography variant="h6" gutterBottom>
+                <AssessmentIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Credit Score
+              </Typography>
+              {score ? (
+                <>
+                  <ScoreDisplay score={score.score}>
+                    {score.score}
+                  </ScoreDisplay>
+                  <Box mt={2}>
+                    <Chip
+                      label={`${getOutlookIcon(score.outlook)} ${score.outlook}`}
+                      size="large"
+                      sx={{ 
+                        backgroundColor: getScoreColor(score.score),
+                        color: 'white',
+                        fontWeight: 'bold'
+                      }}
+                    />
+                  </Box>
+                  <Typography variant="caption" display="block" mt={1}>
+                    Last Updated: {formatTimestamp(score.timestamp)}
+                  </Typography>
+                </>
+              ) : (
+                <Typography variant="body1" color="text.secondary">
+                  No score available
+                </Typography>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* SHAP Factors */}
+          <Grid item xs={12} md={8}>
+            <Paper elevation={2} sx={{ p: 3 }}>
+              <Typography variant="h6" gutterBottom>
+                <TrendingUpIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+                Top 3 SHAP Explanation Factors
+              </Typography>
+              {score && score.shap_values ? (
+                <Box>
+                  {score.shap_values.map((factor, idx) => (
+                    <Chip 
+                      key={idx} 
+                      label={factor} 
+                      variant="outlined"
+                      sx={{ 
+                        margin: 0.5, 
+                        fontSize: '0.9rem',
+                        backgroundColor: idx === 0 ? '#e3f2fd' : 'inherit'
+                      }} 
+                    />
+                  ))}
+                </Box>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  No SHAP factors available
+                </Typography>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* Events History */}
+          <Grid item xs={12}>
+            <Divider sx={{ my: 2 }} />
+            <Typography variant="h6" gutterBottom>
+              <EventIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
+              Recent Event History
+            </Typography>
+            {events && events.length > 0 ? (
+              <List>
+                {events.map((event, idx) => (
+                  <ListItem 
+                    key={idx} 
+                    divider={idx < events.length - 1}
+                    sx={{ pl: 0 }}
+                  >
+                    <ListItemText
+                      primary={
+                        <Box display="flex" alignItems="center">
+                          <Chip 
+                            label={event.event_type} 
+                            size="small" 
+                            color="primary" 
+                            sx={{ mr: 1 }}
+                          />
+                          <Typography variant="body1">
+                            {event.description}
+                          </Typography>
+                        </Box>
+                      }
+                      secondary={formatTimestamp(event.applied_on)}
+                    />
+                  </ListItem>
+                ))}
+              </List>
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                No recent events found
+              </Typography>
+            )}
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
+  );
+}
