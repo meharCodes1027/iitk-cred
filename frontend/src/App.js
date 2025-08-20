@@ -10,7 +10,8 @@ import {
   Activity,
   Rocket,
   Home,
-  BarChart3
+  BarChart3,
+  FileBarChart
 } from "lucide-react";
 import { getIssuersWithScores, getIssuerDetails, triggerRefresh } from "./api";
 import IssuerTable from "./IssuerTable";
@@ -23,10 +24,11 @@ import TypewriterText from "./components/TypewriterText";
 import MetricsDashboard from "./components/MetricsDashboard";
 import FloatingCard from "./components/FloatingCard";
 import LandingPage from "./LandingPage";
+import ReportsAnalytics from "./ReportsAnalytics";
 import "./styles.css";
 
 function App() {
-  const [currentView, setCurrentView] = useState("landing"); // "landing" or "dashboard"
+  const [currentView, setCurrentView] = useState("landing"); // "landing", "dashboard", or "reports"
   const [issuers, setIssuers] = useState([]);
   const [selectedIssuer, setSelectedIssuer] = useState(null);
   const [details, setDetails] = useState(null);
@@ -68,24 +70,30 @@ function App() {
 
   const handleRefresh = async () => {
     try {
+      console.log("Refresh button clicked");
       setRefreshing(true);
       setError(null);
       
       // Call the backend to refresh the data
+      console.log("Calling triggerRefresh API...");
       const refreshResult = await triggerRefresh();
       console.log("Refresh result:", refreshResult);
       
       // Fetch updated issuers after the refresh
-      setTimeout(async () => {
-        await fetchIssuers();
-        if (selectedIssuer) {
-          const det = await getIssuerDetails(selectedIssuer.id);
-          setDetails(det);
-        }
-        setRefreshing(false);
-      }, 1000); // Small delay to ensure backend has processed everything
+      console.log("Fetching updated issuers...");
+      await fetchIssuers();
+      
+      if (selectedIssuer) {
+        console.log("Updating selected issuer details...");
+        const det = await getIssuerDetails(selectedIssuer.id);
+        setDetails(det);
+      }
+      
+      console.log("Refresh completed successfully");
+      setRefreshing(false);
     } catch (err) {
-      setError("Failed to refresh data");
+      const errorMessage = `Failed to refresh data: ${err.message}`;
+      setError(errorMessage);
       console.error("Error refreshing:", err);
       setRefreshing(false);
     }
@@ -93,7 +101,54 @@ function App() {
 
   // Show landing page
   if (currentView === "landing") {
-    return <LandingPage onNavigateToDashboard={() => setCurrentView("dashboard")} />;
+    return <LandingPage 
+      onNavigateToDashboard={() => setCurrentView("dashboard")}
+      onNavigateToReports={() => setCurrentView("reports")}
+    />;
+  }
+  
+  // Show reports & analytics page
+  if (currentView === "reports") {
+    return (
+      <div className="min-h-screen">
+        {/* Aurora Background */}
+        <div className="aurora-bg"></div>
+        <ParticleBackground />
+        
+        {/* Navigation */}
+        <div className="fixed top-6 right-6 z-50 flex gap-4">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setCurrentView("landing")}
+            className="glass rounded-lg px-4 py-2 text-white hover:bg-white/20 transition-all duration-300 flex items-center gap-2"
+          >
+            <Home className="w-4 h-4" />
+            <span>Home</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setCurrentView("dashboard")}
+            className="glass rounded-lg px-4 py-2 text-white hover:bg-white/20 transition-all duration-300 flex items-center gap-2"
+          >
+            <BarChart3 className="w-4 h-4" />
+            <span>Dashboard</span>
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setCurrentView("reports")}
+            className="glass rounded-lg px-4 py-2 text-white bg-blue-500/20 border border-blue-400/30 flex items-center gap-2"
+          >
+            <FileBarChart className="w-4 h-4" />
+            <span>Reports</span>
+          </motion.button>
+        </div>
+        
+        <ReportsAnalytics />
+      </div>
+    );
   }
 
   // Show dashboard
@@ -122,6 +177,15 @@ function App() {
         >
           <BarChart3 className="w-4 h-4" />
           <span>Dashboard</span>
+        </motion.button>
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => setCurrentView("reports")}
+          className="glass rounded-lg px-4 py-2 text-white hover:bg-white/20 transition-all duration-300 flex items-center gap-2"
+        >
+          <FileBarChart className="w-4 h-4" />
+          <span>Reports</span>
         </motion.button>
       </div>
       

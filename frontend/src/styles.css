@@ -365,3 +365,50 @@ body {
   padding: 20px;
   height: 100%;
 }
+
+/* Analytics page styles */
+.glass {
+  background: rgba(15, 23, 42, 0.7);
+  backdrop-filter: blur(10px);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.glass:hover {
+  background: rgba(30, 41, 59, 0.7);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Chart tooltips */
+.recharts-tooltip-wrapper {
+  z-index: 1000 !important;
+}
+
+/* Table row effects */
+.analytics-table-row {
+  transition: background-color 0.2s ease;
+}
+
+.analytics-table-row:hover {
+  background-color: rgba(59, 130, 246, 0.15) !important;
+}
+
+/* Scrollbar styling for analytics */
+.analytics-container::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.analytics-container::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5);
+}
+
+.analytics-container::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.5);
+  border-radius: 4px;
+}
+
+.analytics-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.7);
+}
